@@ -1,100 +1,149 @@
-Free Claude Code Setup with Google Gemini
-A complete setup guide for configuring Claude Code with Gemini models using claude-code and claude-code-router.
+# How to Use Claude Code with Qwen Models for Free
 
-1. Prerequisites
-Verify Node.js Installation
-Open PowerShell and run:
+## ⭐ Requirements  
+Before beginning, make sure the following are installed:
 
-node --version
-If the version is 18.x or higher, you’re good to continue.
-If not, download and install the latest LTS release:
-https://nodejs.org
+- **Qwen CLI** (installed and authenticated)  
+- **Node.js v18 or later**
 
-2. Generate Your Google API Key
-Visit: https://aistudio.google.com
-Select Get API Key
-Click Create API Key
-AIzaSy...............
-3. Install Required CLI Tools
-Open PowerShell (Run as Administrator):
+---
 
+## 🧩 Qwen CLI Installation  
+Install the latest Qwen Code CLI:
+
+```bash
+npm install -g @qwen-code/qwen-code@latest
+```
+
+Verify the installation:
+
+```bash
+qwen --version
+```
+
+---
+
+## 🚀 Step 1: Install Claude Code Router  
+Install Claude Code and the router globally:
+
+```bash
 npm install -g @anthropic-ai/claude-code @musistudio/claude-code-router
-This installs both Claude Code and the router globally.
+```
 
-4. Create Required Configuration Directories
-Run the following in a normal PowerShell window:
+---
 
-mkdir $HOME/.claude-code-router
-mkdir $HOME/.claude
-5. Create the Router Configuration File
-Since Windows does not support cat << EOF syntax, create the configuration file using Notepad:
+## 🔑 Step 2: Get Your Qwen Access Token  
 
-notepad $HOME/.claude-code-router/config.json
-Paste the following JSON configuration exactly as shown:
+```
+C:\Users\PC_USER\.qwen\oauth_creds.json
+```
+You will see something like this:
 
+```json
 {
-  "LOG": true,
-  "LOG_LEVEL": "info",
-  "HOST": "127.0.0.1",
-  "PORT": 3456,
-  "API_TIMEOUT_MS": 600000,
-  "Providers": [
-    {
-      "name": "gemini",
-      "api_base_url": "https://generativelanguage.googleapis.com/v1beta/models/",
-      "api_key": "$GOOGLE_API_KEY",
-      "models": [
-        "gemini-2.5-flash",
-        "gemini-2.0-flash"
-      ],
-      "transformer": {
-        "use": ["gemini"]
-      }
-    }
-  ],
-  "Router": {
-    "default": "gemini,gemini-2.5-flash",
-    "background": "gemini,gemini-2.5-flash",
-    "think": "gemini,gemini-2.5-flash",
-    "longContext": "gemini,gemini-2.5-flash",
-    "longContextThreshold": 60000
-  }
+  "access_token": "YOUR_QWEN_ACCESS_TOKEN_HERE",
+  "token_type": "Bearer",
+  "refresh_token": "YOUR_QWEN_REFRESH_TOKEN_HERE",
+  "resource_url": "portal.qwen.ai",
+  "expiry_date": 1764876220290
 }
-Save and close Notepad once done.
+```
 
-6. Configure Your Environment Variable (API Key)
-Run PowerShell as Administrator:
+Copy your **access_token** — you’ll add it to the router config.
 
-[System.Environment]::SetEnvironmentVariable('GOOGLE_API_KEY', 'YOUR_API_KEY_HERE', 'User')
-Verify the Key
-Close PowerShell → open a new window → run:
+---
 
-echo $env:GOOGLE_API_KEY
-If the key appears, the environment variable is configured correctly.
+## 📁 Step 3: Create Required Folders  
+Run inside your WSL terminal:
 
-7. Validate Installation
-Run the following commands:
+```bash
+mkdir -p ~/.claude-code-router ~/.claude
+```
 
-claude --version
-ccr version
-echo $env:GOOGLE_API_KEY
-If all commands return output without errors, the setup is successful.
+---
 
-Start the Router (Terminal 1)
-ccr start
-Wait until you see:
+## ⚙️ Step 4: Create the Router Configuration  
+Paste this to generate the config file:
 
-✔ Service started successfully
-Use Claude Code (Terminal 2)
-Navigate to your project:
+```bash
+cat > ~/.claude-code-router/config.json << 'EOF'
 
-cd your-project-folder
+{  
+  "LOG": true,  
+  "LOG_LEVEL": "info",  
+  "HOST": "127.0.0.1",  
+  "PORT": 3456,  
+  "API_TIMEOUT_MS": 600000,  
+  "Providers": [  
+    {  
+      "name": "qwen",  
+      "api_base_url": "https://portal.qwen.ai/v1/chat/completions",  
+      "api_key": "YOUR_QWEN_ACCESS_TOKEN_HERE",  
+      "models": [  
+        "qwen3-coder-plus",  
+        "qwen3-coder-plus",  
+        "qwen3-coder-plus"  
+      ]  
+    }  
+  ],  
+  "Router": {  
+    "default": "qwen,qwen3-coder-plus",  
+    "background": "qwen,qwen3-coder-plus",  
+    "think": "qwen,qwen3-coder-plus",  
+    "longContext": "qwen,qwen3-coder-plus",  
+    "longContextThreshold": 60000,  
+    "webSearch": "qwen,qwen3-coder-plus"  
+  }  
+}
+
+EOF
+```
+
+---
+
+## ▶️ Step 5: Start Using Claude Code with Qwen  
+Restart the router:
+
+```bash
+ccr restart
+```
+
+Launch Claude Code with Qwen support:
+
+```bash
 ccr code
-9. Quick Test
-Run:
+```
 
-ccr code
-Then type:
+Test:
 
-hi
-If Claude responds, your Claude Code + Gemini setup is fully operational.
+```
+> hi
+```
+
+---
+
+## 🔄 Handling 401 Token Errors  
+If your Qwen OAuth token expires:
+
+### 1️⃣ Reauthenticate  
+If tokens don’t match, delete `oauth_creds.json` and run:
+
+```bash
+qwen
+```
+
+### 2️⃣ Update your router config  
+```powershell
+notepad "$env:USERPROFILE\.claude-code-router\config.json"
+```
+
+Replace `api_key` with the new `access_token`.
+
+### 3️⃣ Restart the router  
+```bash
+ccr restart
+```
+
+PowerShell users: ensure your shell environment is correctly set.
+
+---
